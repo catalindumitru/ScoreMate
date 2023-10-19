@@ -1,0 +1,53 @@
+/* src/components/UserListPage.css */
+.user-list-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.user-list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.user-card-list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center cards horizontally */
+}
+
+.user-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+
+  width: 300px;
+  text-align: center;
+  transition: transform 0.1s ease-in-out;
+}
+
+.user-card:hover {
+  transform: scale(1.05);
+  background-color: #82e2b5;
+}
+
+.user-card h2 {
+  font-size: 1.5rem;
+  margin: 0px;
+  color: #333333;
+}
+
+.user-card-link {
+  margin: 12px;
+  text-decoration: none; /* Remove default link underline */
+  color: inherit; /* Inherit the text color from parent */
+  cursor: pointer; /* Change cursor to a pointer on hover */ /* Add a smooth background color transition on hover */
+}
