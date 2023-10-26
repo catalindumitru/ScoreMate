@@ -42,9 +42,9 @@ def get_score():
     cursor = collection.find(query)
 
     document = cursor.next()
-    score = {"score_1": document["score1"], "score_2": document["score2"]}
 
-    response = jsonify(score)
+    del document["_id"]
+    response = jsonify(document)
     return response
 
 
