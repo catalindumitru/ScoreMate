@@ -1,10 +1,75 @@
-from flask import Blueprint, jsonify
+import os
+from dotenv import load_dotenv
+from flask import Blueprint, jsonify, request
+from pymongo.mongo_client import MongoClient
 
-main = Blueprint('main', __name__)
+load_dotenv()
 
-@main.route("/search_product", methods=["GET"])
-def search_product():
+main = Blueprint("main", __name__)
+client = MongoClient(os.getenv("MONGODB_URI"))
+db = client["ScoreMate"]
 
-    results = None
-    response = jsonify({"results": results})
+
+@main.route("/getOpponents", methods=["GET"])
+def get_opponents():
+    args = request.args
+    user = args["user"]
+
+    collection = db["H2Hs"]
+    query = {"$or": [{"user1": user}, {"user2": user}]}
+    cursor = collection.find(query)
+
+    opponents = []
+    for document in cursor:
+        opponents.append(
+            document["user1"] if document["user1"] != user else document["user2"]
+        )
+
+    response = jsonify({"opponents": opponents})
+    return response
+
+
+@main.route("/getScore", methods=["GET"])
+def get_score():
+    args = request.args
+    user1 = args["user1"]
+    user2 = args["user2"]
+
+    collection = db["H2Hs"]
+    query = {
+        "$or": [{"user1": user1, "user2": user2}, {"user1": user2, "user2": user1}]
+    }
+    cursor = collection.find(query)
+
+    document = cursor.next()
+    score = {"score_1": document["score1"], "score_2": document["score2"]}
+
+    response = jsonify(score)
+    return response
+
+
+@main.route("/increaseScore", methods=["POST"])
+def increase_score():
+    args = request.form
+    user1 = args["user1"]
+    user2 = args["user2"]
+    winner = args["winner"]
+
+    collection = db["H2Hs"]
+    query = {
+        "$or": [{"user1": user1, "user2": user2}, {"user1": user2, "user2": user1}]
+    }
+    cursor = collection.find(query)
+
+    document = cursor.next()
+    if (winner == user1 and document["user1"] == user1) or (
+        winner == user2 and document["user1"] == user2
+    ):
+        update_operation = {"$inc": {"score1": 1}}
+    else:
+        update_operation = {"$inc": {"score2": 1}}
+
+    collection.update_one(query, update_operation)
+
+    response = jsonify(winner)
     return response
