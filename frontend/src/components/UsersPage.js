@@ -1,22 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../style/UsersPage.css";
-
-const usersData = [
-  { id: 1, name: "User 1", email: "user1@example.com" },
-  { id: 2, name: "User 2", email: "user2@example.com" },
-  { id: 3, name: "User 3", email: "user3@example.com" },
-  { id: 3, name: "User 4", email: "user3@example.com" },
-  { id: 3, name: "User 5", email: "user3@example.com" },
-  // Add more user data as needed
-];
+import { getOpponents } from "../database/accessor";
 
 function UsersPage() {
+  const [opponents, setOpponents] = useState(
+    JSON.parse(sessionStorage.getItem("opponents")) || []
+  );
+
+  useEffect(() => {
+    if (!sessionStorage.getItem("opponents")) {
+      getOpponents().then((data) => {
+        sessionStorage.setItem("opponents", JSON.stringify(data.opponents));
+        setOpponents(data.opponents);
+      });
+    }
+  }, []);
+
   return (
     <div className="user-list-page">
-      <h1>User List</h1>
+      <h1>Opponents</h1>
       <div className="user-list-container">
-        <UserCardList users={usersData} />
+        <UserCardList users={opponents} />
       </div>
     </div>
   );
@@ -25,8 +30,8 @@ function UsersPage() {
 function UserCardList({ users }) {
   return (
     <div className="user-card-list">
-      {users.map((user) => (
-        <UserCard key={user.id} user={user} onClick />
+      {users.map((user, idx) => (
+        <UserCard key={idx} user={user} onClick />
       ))}
     </div>
   );
@@ -34,9 +39,9 @@ function UserCardList({ users }) {
 
 function UserCard({ user }) {
   return (
-    <Link to={`score/${user.id}`} className="user-card-link">
+    <Link to={`score/${user}`} className="user-card-link">
       <div className="user-card">
-        <h2>{user.name}</h2>
+        <h2>{user}</h2>
       </div>{" "}
     </Link>
   );

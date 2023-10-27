@@ -7,12 +7,12 @@ import ScorePage from "./components/ScorePage";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <Router>
-      <Routes>
-        <Route exact path="/" element={<MainPage />} />
-        <Route path="/score/:userId" element={<ScorePage />} />
-      </Routes>
-    </Router>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <Router>
+    <Routes>
+      <Route exact path="/" element={<MainPage />} />
+      <Route path="/score/:opponent" element={<ScorePage />} />
+    </Routes>
+  </Router>
+  // </React.StrictMode>
 );
