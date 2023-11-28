@@ -60,7 +60,6 @@ def increase_score():
         "$or": [{"user1": user1, "user2": user2}, {"user1": user2, "user2": user1}]
     }
     cursor = collection.find(query)
-
     document = cursor.next()
     if (winner == user1 and document["user1"] == user1) or (
         winner == user2 and document["user1"] == user2
