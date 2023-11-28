@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/ScoreMate/static/css/main.814f755f.css",
-    "main.js": "/ScoreMate/static/js/main.33512f88.js",
+    "main.js": "/ScoreMate/static/js/main.bf669cec.js",
     "index.html": "/ScoreMate/index.html",
     "main.814f755f.css.map": "/ScoreMate/static/css/main.814f755f.css.map",
-    "main.33512f88.js.map": "/ScoreMate/static/js/main.33512f88.js.map"
+    "main.bf669cec.js.map": "/ScoreMate/static/js/main.bf669cec.js.map"
   },
   "entrypoints": [
     "static/css/main.814f755f.css",
-    "static/js/main.33512f88.js"
+    "static/js/main.bf669cec.js"
   ]
 }
