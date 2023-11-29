@@ -48,12 +48,13 @@ def get_score():
     return response
 
 
-@main.route("/increaseScore", methods=["POST"])
-def increase_score():
-    args = request.form
+@main.route("/updateScore", methods=["POST"])
+def update_score():
+    args = request.json
     user1 = args["user1"]
     user2 = args["user2"]
-    winner = args["winner"]
+    target = args["target"]
+    operation = args["operation"]
 
     collection = db["H2Hs"]
     query = {
@@ -61,14 +62,16 @@ def increase_score():
     }
     cursor = collection.find(query)
     document = cursor.next()
-    if (winner == user1 and document["user1"] == user1) or (
-        winner == user2 and document["user1"] == user2
+    if (target == user1 and document["user1"] == user1) or (
+        target == user2 and document["user1"] == user2
     ):
-        update_operation = {"$inc": {"score1": 1}}
+        target_score = "score1"
     else:
-        update_operation = {"$inc": {"score2": 1}}
+        target_score = "score2"
+
+    update_operation = {"$inc": {target_score: 1 if operation == "increase" else -1}}
 
     collection.update_one(query, update_operation)
 
-    response = jsonify(winner)
+    response = jsonify(target)
     return response

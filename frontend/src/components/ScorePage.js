@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardHeader,
@@ -6,14 +6,11 @@ import {
   Heading,
   Text,
   Button,
-  AbsoluteCenter,
-  Box,
   Grid,
   GridItem,
-  Flex,
 } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
-import { getScore } from "../database/accessor";
+import { getScore, updateScore } from "../database/accessor";
 import { USERNAME } from "../auth/user";
 
 import "../style/ScorePage.css";
@@ -25,25 +22,56 @@ function ScorePage() {
     sessionScore ? sessionScore[opponent] : {}
   );
 
+  const parseScoreDB = useCallback(
+    (scoreDB) => {
+      const score = {};
+      [score[USERNAME], score[opponent]] =
+        scoreDB["user1"] === USERNAME
+          ? [scoreDB["score1"], scoreDB["score2"]]
+          : [scoreDB["score2"], scoreDB["score1"]];
+
+      return score;
+    },
+    [opponent]
+  );
+
+  const updateSessionScore = useCallback(
+    (newScore) => {
+      sessionStorage.setItem(
+        "score",
+        JSON.stringify({
+          ...sessionScore,
+          [opponent]: newScore,
+        })
+      );
+    },
+    [opponent, sessionScore]
+  );
+
   useEffect(() => {
-    if (!sessionScore || !sessionScore[opponent]) {
-      getScore(opponent).then((data) => {
-        console.log(data);
-        if (data["user1"] !== USERNAME) {
-          [data["score1"], data["score2"]] = [data["score2"], data["score1"]];
-          [data["user1"], data["user2"]] = [data["user2"], data["user1"]];
-        }
-        sessionStorage.setItem(
-          "score",
-          JSON.stringify({
-            ...sessionScore,
-            [opponent]: data,
-          })
-        );
-        setScore(data);
-      });
-    }
-  }, [opponent, sessionScore]);
+    const fetchData = async () => {
+      if (sessionScore && sessionScore[opponent]) return;
+
+      const newScore = parseScoreDB(await getScore(USERNAME, opponent));
+      setScore(newScore);
+      updateSessionScore(newScore);
+    };
+
+    fetchData();
+  }, [opponent, sessionScore, parseScoreDB, updateSessionScore]);
+
+  function handleScoreButton(target, operation) {
+    return async () => {
+      await updateScore(USERNAME, opponent, target, operation);
+      const newScore = {
+        ...score,
+        [target]:
+          operation === "increase" ? score[target] + 1 : score[target] - 1,
+      };
+      setScore(newScore);
+      updateSessionScore(newScore);
+    };
+  }
 
   return (
     score && (
@@ -69,18 +97,26 @@ function ScorePage() {
             <CardFooter alignSelf={"center"}>
               <Grid templateColumns="repeat(3, 1fr)" gap="10vw" maxWidth="100%">
                 <GridItem colSpan={1} alignSelf={"center"}>
-                  <Button bg="#66BB69" size="lg">
+                  <Button
+                    bg="#66BB69"
+                    size="lg"
+                    onClick={handleScoreButton(USERNAME, "increase")}
+                  >
                     <Text fontSize="2xl">+</Text>
                   </Button>
                 </GridItem>
                 <GridItem colSpan={1} alignSelf={"center"}>
                   {" "}
                   <Text fontSize="5xl" align={"center"} color="#8FC9F9">
-                    {score["score1"]}
+                    {score[USERNAME]}
                   </Text>
                 </GridItem>
                 <GridItem colSpan={1} alignSelf={"center"}>
-                  <Button bg="#F44336" size="lg">
+                  <Button
+                    bg="#F44336"
+                    size="lg"
+                    onClick={handleScoreButton(USERNAME, "decrease")}
+                  >
                     <Text fontSize="2xl">-</Text>
                   </Button>
                 </GridItem>
@@ -91,25 +127,28 @@ function ScorePage() {
         <GridItem rowSpan={1} alignSelf="center">
           <Card width="80%" bg="#0F1924">
             <CardHeader alignSelf={"center"}>
-              <Grid
-                templateColumns="repeat(3, 1fr)"
-                gap={100}
-                gap="10vw"
-                maxWidth="100%"
-              >
+              <Grid templateColumns="repeat(3, 1fr)" gap="10vw" maxWidth="100%">
                 <GridItem colSpan={1} alignSelf={"center"}>
-                  <Button bg="#66BB69" size="lg">
+                  <Button
+                    bg="#66BB69"
+                    size="lg"
+                    onClick={handleScoreButton(opponent, "increase")}
+                  >
                     <Text fontSize="2xl">+</Text>
                   </Button>
                 </GridItem>
                 <GridItem colSpan={1} alignSelf={"center"}>
                   {" "}
                   <Text fontSize="5xl" align={"center"} color="#8FC9F9">
-                    {score["score2"]}
+                    {score[opponent]}
                   </Text>
                 </GridItem>
                 <GridItem colSpan={1} alignSelf={"center"}>
-                  <Button bg="#F44336" size="lg">
+                  <Button
+                    bg="#F44336"
+                    size="lg"
+                    onClick={handleScoreButton(opponent, "decrease")}
+                  >
                     <Text fontSize="2xl">-</Text>
                   </Button>
                 </GridItem>

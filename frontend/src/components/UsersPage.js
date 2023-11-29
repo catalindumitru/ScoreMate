@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "../style/UsersPage.css";
+import { USERNAME } from "../auth/user";
 import { getOpponents } from "../database/accessor";
+import {
+  Card,
+  CardBody,
+  Heading,
+  Text,
+  Button,
+  Grid,
+  GridItem,
+  Box,
+} from "@chakra-ui/react";
 
 function UsersPage() {
   const [opponents, setOpponents] = useState(
@@ -9,40 +19,58 @@ function UsersPage() {
   );
 
   useEffect(() => {
-    if (!sessionStorage.getItem("opponents")) {
-      getOpponents().then((data) => {
-        sessionStorage.setItem("opponents", JSON.stringify(data.opponents));
-        setOpponents(data.opponents);
-      });
-    }
+    const fetchData = async () => {
+      if (sessionStorage.getItem("opponents")) return;
+
+      const newOpponents = await getOpponents(USERNAME).then(
+        (res) => res.opponents
+      );
+      sessionStorage.setItem("opponents", JSON.stringify(newOpponents));
+      setOpponents(newOpponents);
+      console.log(newOpponents);
+    };
+
+    fetchData();
   }, []);
 
   return (
-    <div className="user-list-page">
-      <h1>Opponents</h1>
-      <div className="user-list-container">
-        <UserCardList users={opponents} />
-      </div>
-    </div>
+    <Box w="100%" h="100dvh" bg="#111418" align="center">
+      <Grid templateRows="repeat(2, 1fr)" w="80%" h="100dvh">
+        <GridItem h="10%" paddingTop="25">
+          <Heading size="2xl" color="#8FC9F9">
+            Opponents
+          </Heading>
+        </GridItem>
+        <GridItem>
+          <UserCardList users={opponents} />
+        </GridItem>
+      </Grid>
+    </Box>
   );
 }
 
 function UserCardList({ users }) {
   return (
-    <div className="user-card-list">
+    <Grid gap="5">
       {users.map((user, idx) => (
-        <UserCard key={idx} user={user} onClick />
+        <GridItem>
+          <UserCard user={user}></UserCard>
+        </GridItem>
       ))}
-    </div>
+    </Grid>
   );
 }
 
 function UserCard({ user }) {
   return (
-    <Link to={`score/${user}`} className="user-card-link">
-      <div className="user-card">
-        <h2>{user}</h2>
-      </div>{" "}
+    <Link to={`score/${user}`}>
+      <Card w="80%" bg="#0F1924" _hover={{ bg: "teal" }}>
+        <CardBody>
+          <Text fontSize="3xl" color="#8FC9F9">
+            {user}
+          </Text>
+        </CardBody>
+      </Card>
     </Link>
   );
 }
