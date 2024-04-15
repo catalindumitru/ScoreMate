@@ -1,13 +1,21 @@
 import os
 from dotenv import load_dotenv
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, logging
 from pymongo.mongo_client import MongoClient
+from json import dumps
 
 load_dotenv()
 
 main = Blueprint("main", __name__)
 client = MongoClient(os.getenv("MONGODB_URI"))
 db = client["ScoreMate"]
+
+
+@main.route("/slack", methods=["POST"])
+def slack():
+    d = request.values.to_dict()
+    response = jsonify({"slack": dumps(d)})
+    return response
 
 
 @main.route("/getOpponents", methods=["GET"])
