@@ -1,6 +1,4 @@
 import requests
-import schedule
-import time
 
 # Replace with your Render.com server URL
 SERVER_URL = "https://score-mate.onrender.com/healthz"
