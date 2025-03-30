@@ -11,6 +11,10 @@ client = MongoClient(os.getenv("MONGODB_URI"))
 db = client["ScoreMate"]
 
 
+@main.route("/healthz", methods=["GET"])
+def healthz():
+    return jsonify({"success": 0})
+
 @main.route("/slack", methods=["POST"])
 def slack():
     d = request.values.to_dict()
